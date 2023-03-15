@@ -3,3 +3,6 @@ build
 .vscode
 .vs
 out
+
+#ignore .txt, should start as empty
+.txt 

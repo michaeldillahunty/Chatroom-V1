@@ -72,8 +72,8 @@ int main(){
 
    
 
-//   bool status = false; // if the current user is logged in or not
-   bool logged_in = false; 
+
+   // bool logged_in = false; 
 
 /***** while 1 *****/
    while(1){
@@ -102,7 +102,7 @@ int main(){
       Users curr_user;  // create a user, don't allocate anything yet 
       curr_user.set_login_status(false);
       char buffer[MAX_LINE];
-      logged_in = false;
+      // logged_in = false;
 /* while 2*/      
       while(1){
          ssize_t recieved = recv(client_sock_fd, buffer, sizeof(buffer), 0); 
@@ -121,7 +121,7 @@ int main(){
          string message_str;
          copy_ss << buffer;
          message_str = copy_ss.str();
-         cout << "message_str: " << message_str << endl;
+         // cout << "message_str: " << message_str << endl;
 
          ServerCommands sc;
          vector<string>tokens_vec; 
@@ -132,95 +132,147 @@ int main(){
             cout << "at " << i << " " << tokens_vec.at(i) << "\n";
          }
 
-         /* commands */   
+         /* ************
+          *
+          *  Commands
+          * 
+          ************ */   
          try {
-            string login_fail_msg;
+            // cout << "BEFORE COMMANDS CHECKS (" << tokens_vec.at(0) << ")" << endl;
+            // cout << buffer << endl;
+
+            /****************** 
+               COMMAND: login
+            ******************/
             if (tokens_vec.at(0) == "login") {
-               // if (tokens_vec.size() != 3) {
-               //    return -1; 
-               // }
+               string login_fail_msg;
                int server_login = sc.recieve_login(client_sock_fd, tokens_vec.at(1), tokens_vec.at(2), curr_user);
-               cout << "--- IN SERVER MAIN: user status = " << curr_user.get_login_status() << endl;
+               // cout << "--- IN SERVER MAIN: user status = " << curr_user.get_login_status() << endl;
                if (curr_user.get_login_status() == false) {
-               if (server_login == -1){
-                  login_fail_msg = "[ERROR] Login Failed - Failed to connect user";
-                  char temp_buff[MAX_LINE];
-                  strcpy(temp_buff, login_fail_msg.c_str());
-                  send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
-                  throw invalid_argument(login_fail_msg);
-               } else if (server_login == 2) {
-                  login_fail_msg = "[ERROR] Login Failed - Password is incorrect - try again";
-                  char temp_buff[MAX_LINE];
-                  strcpy(temp_buff, login_fail_msg.c_str());
-                  send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
-                  throw invalid_argument(login_fail_msg);
-               } else if (server_login == 3) {
-                  login_fail_msg = "[ERROR] Login Failed - User does not exist";
-                  char temp_buff[MAX_LINE];
-                  strcpy(temp_buff, login_fail_msg.c_str());
-                  send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
-                  throw CustomException(login_fail_msg.c_str());
-               } else {
-                  cout << "STATUS 2: " << curr_user.get_login_status() << endl;
-                  curr_user.set_login_status(true);
-                  string login_success = "[server]: Successfully logged-in " + tokens_vec.at(1) + "!";
-                  strcpy(buffer, login_success.c_str());
-                  cout << "BUFFER LOGIN MESSAGE: " << buffer << endl;
-                  send(client_sock_fd, buffer, sizeof(buffer), 0);
-               }
-               cout << "Login Success! User " << tokens_vec.at(1) << " signed in" << endl;
-               } else {
+                  if (server_login == -1){
+                     login_fail_msg = "[ERROR] Login Failed - Failed to connect user";
+                     char temp_buff[MAX_LINE];
+                     strcpy(temp_buff, login_fail_msg.c_str());
+                     send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
+                     cout << login_fail_msg << endl;
+                     // throw invalid_argument(login_fail_msg);
+                  } else if (server_login == 2) {
+                     login_fail_msg = "[ERROR] Login Failed - Password is incorrect - try again";
+                     char temp_buff[MAX_LINE];
+                     strcpy(temp_buff, login_fail_msg.c_str());
+                     send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
+                     cout << login_fail_msg << endl;
+                     // throw invalid_argument(login_fail_msg);
+                  } else if (server_login == 3) {
+                     login_fail_msg = "[ERROR] Login Failed - User does not exist";
+                     char temp_buff[MAX_LINE];
+                     strcpy(temp_buff, login_fail_msg.c_str());
+                     send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
+                     cout << login_fail_msg << endl;
+                     // throw CustomException(login_fail_msg.c_str());
+                  } else {
+                     // cout << "STATUS 2 BEFORE: " << curr_user.get_login_status() << endl;
+                     curr_user.set_login_status(true);
+                     // cout << "STATUS 2 AFTER: " << curr_user.get_login_status() << endl;
+                     string login_success = "[server]: Successfully logged-in " + tokens_vec.at(1) + "!";
+                     cout << "[server] " << login_success << endl;
+                     strcpy(buffer, login_success.c_str());
+                     send(client_sock_fd, buffer, sizeof(buffer), 0);
+                  }
+                  cout << "Login Success! User " << tokens_vec.at(1) << " signed in" << endl;
+               } else { // 
+                  // cout << "STATUS 3 STATUS = TRUE : " << curr_user.get_login_status() << endl;
                   string success_msg_tst = "User already logged in\n";
                   char temp_buff[MAX_LINE];
                   strcpy(temp_buff, success_msg_tst.c_str());
                   send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
 
                }
+
+
+            /****************** 
+               COMMAND: newuser
+            ******************/
             } else if (tokens_vec.at(0) == "newuser") {
+               string newuser_fail_msg;
                int server_newuser = sc.recieve_newuser(client_sock_fd, tokens_vec.at(1), tokens_vec.at(2));
                if (server_newuser == -1) {
-                  throw invalid_argument("[ERROR] Invalid arguments\n(expected format: <newuser> <username> <password>)\n");
+                  newuser_fail_msg = "> [ERROR] Invalid arguments - (expected input format: <newuser> <username> <password>)\n";
+                  char temp_buff[MAX_LINE];
+                  strcpy(temp_buff, newuser_fail_msg.c_str());
+                  send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
+                  cout << newuser_fail_msg << endl;
+                  // throw invalid_argument();
                } else if (server_newuser == -2) {
-                  throw invalid_argument("[ERROR] Invalid username length : expected between 3-32 characters\n");
+                  newuser_fail_msg = "> [ERROR] Invalid username length : expected between 3-32 characters\n";
+                  char temp_buff[MAX_LINE];
+                  strcpy(temp_buff, newuser_fail_msg.c_str());
+                  send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
+                  cout << newuser_fail_msg << endl;
+                  // throw invalid_argument();
                } else if (server_newuser == -3) {
-                  throw invalid_argument("[ERROR] Invalid password length : expected between 4-8 characters\n");
+                  newuser_fail_msg = "> [ERROR] Invalid username length : expected between 3-32 characters\n";
+                  char temp_buff[MAX_LINE];
+                  newuser_fail_msg = "> [ERROR] Invalid password length : expected between 4-8 characters\n"; 
+                  strcpy(temp_buff, newuser_fail_msg.c_str());
+                  send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
+                  cout << newuser_fail_msg << endl;
+                  
+                  // throw invalid_argument();
                } else if (server_newuser == 1) {
                   string user_id_error = tokens_vec.at(1).c_str();
-                  string error_msg1 = "[ERROR] Failed to create new user (User '" + user_id_error + "' already exists)";
-                  throw CustomException(error_msg1.c_str());
-               } 
-               
-               
+                  newuser_fail_msg = "[ERROR] Failed to create new user (User '" + user_id_error + "' already exists)\n";
+                  char temp_buff[MAX_LINE];
+                  strcpy(temp_buff, newuser_fail_msg.c_str());
+                  send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
+                  cout << newuser_fail_msg << endl;
 
+                  // throw CustomException(error_msg1.c_str());
+               } 
+               char temp_buff[MAX_LINE];
+               string newuser_message = "[server] > successfully created new user (" + curr_user.get_uid() + ") - Please Login\n";
+               strcpy(temp_buff, newuser_message.c_str());
+               send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
+               
+            /****************** 
+               COMMAND: message
+            ******************/
             } else if (tokens_vec.at(0) == "message") {
                // MUST BE LOGGED IN TO SEND A MESSAGE
-               if (logged_in) { 
-                  /* 
-                  
-                     DO SOMETHING
+               if (curr_user.get_login_status() == true) { 
 
-                  */
+
                } else { // IF NOT LOGGED IN
                   string failed_send = "[ERROR] Must be logged in to send a message!";
                   strcpy(buffer, failed_send.c_str());
                   send(client_sock_fd, buffer, sizeof(buffer), 0);
                }
 
-            } else if (tokens_vec.at(0) == "logout") {
+            /****************** 
+               COMMAND: logout
+            ******************/
+            } else if (tokens_vec.at(0).compare("logout") == 0) {
                // MUST BE LOGGED IN TO LOG OUT 
-               if (!logged_in){
-                  string failed_send = "[ERROR] Can't do that! Must be logged in to log out!";
-                  strcpy(buffer, failed_send.c_str());
-                  send(client_sock_fd, buffer, sizeof(buffer), 0);
-               } else {
-                  /*
-
-                     DO SOMEHING
-
-                  */
+               if (curr_user.get_login_status() == false){
+                  string failed_logout = "[ERROR] No User to Logout!";
+                  char logout_buff[MAX_LINE];
+                  strcpy(logout_buff, failed_logout.c_str());
+                  send(client_sock_fd, logout_buff, sizeof(logout_buff), 0);
+                  throw CustomException(failed_logout.c_str());
+               } else { // if there is someone logged in
+                  curr_user.set_login_status(false);
+                  int rt_logout = sc.recieve_logout(client_sock_fd);
+                  if (rt_logout != 0){
+                     throw CustomException("Logout failed\n");
+                  }
+                  string logout_success = "> " + curr_user.get_uid() + " logging out...\n";
+                  cout << "User: " << curr_user.get_uid() << " logged out" << endl;
+                  char logout_buff[MAX_LINE];
+                  strcpy(logout_buff, logout_success.c_str());
+                  send(client_sock_fd, logout_buff, sizeof(logout_buff), 0);
+                  tokens_vec.at(1).clear();
+                  
                }
-
-            } else {
 
             }
             
@@ -229,8 +281,11 @@ int main(){
          } catch (invalid_argument& e) { // handle invalid argument exceptions for invalid commands / usage 
             cout << e.what() << endl;
          } catch (exception& e) {  // handle other possible excpetions that may have been missed such as vector errors
+            /*
+               This catch is printing 'vector' for some reason
+            */
             cout << e.what() << endl;
-         } 
+         }
 
       }
 

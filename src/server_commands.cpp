@@ -76,23 +76,23 @@ int ServerCommands::recieve_login(int socket, string user_id, string password, U
       return -1;
    }
 
-   cout << "IN SERVER:\n Parameters: Username = " << user_id << " Password = " << password << endl;
+   // cout << "IN SERVER:\n Parameters: Username = " << user_id << " Password = " << password << endl;
    // char buffer[MAX_LINE];
    vector<Users> user_vec;
    user_vec = search_file(USERS_FILE); // loop through file and store username and password in vector
 
-   user_obj.set_uid(user_id); /* SEG FAULT HERE */
+   user_obj.set_uid(user_id); 
    string obj_uid = user_obj.get_uid();
    user_obj.set_password(password);
    string obj_pass = user_obj.get_password();
-   cout << "OBJ USERNAME: " << obj_uid << " PASSWORD: " << obj_pass << endl;
+   // cout << "OBJ USERNAME: " << obj_uid << " PASSWORD: " << obj_pass << endl;
 
    bool user_found = false; // flag to help know when to exit
    ServerCommands::print_users(user_vec);
    // for (auto user = begin(user_vec); user != end(user_vec); ++user){ // loop through vector
    for (auto user : user_vec) {
-      if (user.get_uid().compare(user_id) == 0 && user.get_login_status() == false) {
-         if (user.get_password().compare(password) == 0) {
+      if (user.get_uid().compare(obj_uid) == 0 && user_obj.get_login_status() == false) {
+         if (user.get_password().compare(obj_pass) == 0) {
                // cout << "Updated Login Status: \n Before: " << user_obj.get_login_status();
                // user_obj.set_login_status(true); // update user login status
                // cout << "\n After: " << user_obj.get_login_status() << endl;
@@ -118,8 +118,8 @@ int ServerCommands::recieve_login(int socket, string user_id, string password, U
 
 
 int ServerCommands::recieve_newuser(int socket, string& newuser_id, string& new_passwd){
-   cout << "newuser username length: " << newuser_id.length() << "\n";  
-   cout << "Password Length: " << new_passwd.length() << endl;
+   // cout << "newuser username length: " << newuser_id.length() << "\n";  
+   // cout << "Password Length: " << new_passwd.length() << endl;
    if (!socket){
       return -1;
    }
@@ -222,8 +222,12 @@ int ServerCommands::recieve_message(int socket, string& message){
    return 0;
 }
 
-int recieve_logout(int socket){
-   UNUSED(socket);
+int ServerCommands::recieve_logout(int socket){
+   // UNUSED(socket);
+   if (socket <= 0){
+      return -1; 
+   }
+   cout << "Logging out..." << endl;
    return 0;
 }
 

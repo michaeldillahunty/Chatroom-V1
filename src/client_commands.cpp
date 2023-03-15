@@ -43,8 +43,15 @@ int ClientCommands::send_message(int socket, char*message){
 }
 
 int ClientCommands::logout(int socket){
-   UNUSED(socket);
-   return 0;
+   if (socket <= 0){
+      return -1;
+   }
+   char msg_buff[MAX_LINE];
+   string msg_str = "logout";
+   strcpy(msg_buff, msg_str.c_str());
+   
+   return send(socket, msg_buff, sizeof(msg_buff), 0);
+
 }
 
 /* Reference for tokenizing a string into a vector

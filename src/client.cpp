@@ -48,12 +48,6 @@ int main(){
       //    cout << "at " << i << " " << tokens_vec.at(i) << "\n";
       // }
 
-      // char recv_response[MAX_LINE];
-      // int recieved = recv(client_sock_fd, recv_response, sizeof(recv_response), 0);
-      // if (recieved != 1){
-      //    cout << "Failed to recieve message from server" << endl;
-      // }
-
       try {
          
          /****************** 

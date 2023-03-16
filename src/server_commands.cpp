@@ -56,23 +56,7 @@ void ServerCommands::print_users(vector<Users> vec){
 // }
 
 int ServerCommands::recieve_login(int socket, string user_id, string password, Users&user_obj){
-/* Implementation when passing a vector of user objects
-   // Check if user exists in vector
-   for (auto& user : users) {
-      if (user.get_uid() == user_id) {
-         // Check if password is correct
-         if (user.get_password() == password) {
-               // Set login status to true
-               user.set_login_status(true);
-               return 0; // Login successful
-         } else {
-               return -1; // Incorrect password
-         }
-      }
-   }
-   return -2; // User not found
-*/
-if (socket <= 0) {
+   if (socket <= 0) {
       return -1;
    }
 
@@ -88,7 +72,7 @@ if (socket <= 0) {
    // cout << "OBJ USERNAME: " << obj_uid << " PASSWORD: " << obj_pass << endl;
 
    bool user_found = false; // flag to help know when to exit
-   ServerCommands::print_users(user_vec);
+   // ServerCommands::print_users(user_vec);
    // for (auto user = begin(user_vec); user != end(user_vec); ++user){ // loop through vector
    for (auto user : user_vec) {
       if (user.get_uid().compare(obj_uid) == 0 && user_obj.get_login_status() == false) {
@@ -261,7 +245,6 @@ int ServerCommands::recieve_message(int socket, vector<string>message_vec, Users
 // }
 
 int ServerCommands::recieve_logout(int socket, Users& user){
-   cout << "---- TEST 1" << endl;
    string fail_logout;
    if (socket <= 0){
       fail_logout = "[error]: Invalid socket\n";
@@ -272,33 +255,21 @@ int ServerCommands::recieve_logout(int socket, Users& user){
       char buff[MAX_LINE];
       fail_logout = "[error]: No user is logged in\n";
       strcpy(buff, fail_logout.c_str());
-      cout << "In Recieve Logout : " << buff << endl;
       return -2; 
    } else {
       user.set_login_status(false);
       string return_msg;
       char buff[MAX_LINE];
       strcpy(buff, return_msg.c_str());
-      cout << "In Recieve Logout : " << buff << endl;
       if (send(socket, buff, sizeof(buff), 0) == -1){
          return 1; 
       } else {
          return_msg = "> [server] Successfully logged out User: " + user.get_uid();
-         cout << "> [server] Successfully logged out User: " << user.get_uid() << endl;
+         cout << "> Successfully logged out User: " << user.get_uid() << endl;
       }
    }
    return 0; 
 }
-
-
-// int ServerCommands::recieve_logout(int socket){
-//    // UNUSED(socket);
-//    if (socket <= 0){
-//       return -1; 
-//    }
-//    // cout << "Logging out..." << endl;
-//    return 0;
-// }
 
 vector<string>ServerCommands::tokenize(const string& s, char delimiter){
    vector<string>result;

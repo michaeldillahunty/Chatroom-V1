@@ -62,13 +62,6 @@ int ClientCommands::logout(int socket){
    if (socket < 0){
       return -1;
    }
-   // char msg_buff[MAX_LINE];
-   // string msg_str = "logout";
-   // strcpy(msg_buff, msg_str.c_str());     
-   
-   // if ((send(socket, msg_buff, sizeof(msg_buff), 0)) < 0){
-   //    return -2; 
-   // }
    return 0;
 }
 

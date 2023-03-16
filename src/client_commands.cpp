@@ -34,7 +34,8 @@ int ClientCommands::create_newuser(int socket, string& user_id, string& password
       if (password.length() < 4 || password.length() > 8){
          return -3; // return -3 for invalid password
       }
-      string return_str = "New user '" + user_id + "' created";
+      // string return_str = "New user '" + user_id + "' created";
+      string return_str = "newuser " + user_id + " " + password;
       char buff[MAX_LINE];
       strcpy(buff, return_str.c_str());
       

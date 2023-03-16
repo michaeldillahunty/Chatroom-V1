@@ -147,6 +147,7 @@ int ServerCommands::compare_users(const string&filename, string& username, strin
          }
       } 
    }
+   
    // error getting users from file
    return 0; 
 }

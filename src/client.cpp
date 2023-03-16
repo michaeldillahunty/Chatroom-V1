@@ -24,7 +24,7 @@ int main(){
    }
 
    char message_buff[MAX_LINE];
-   if (recv(client_sock_fd, message_buff, sizeof(message_buff), 0) <= 0){
+   if (recv(client_sock_fd, message_buff, sizeof(message_buff), 0) < 0){
       cout << "[error] failed to retrieve initial message from socket" << endl;
       return -1;
    } else {
@@ -60,7 +60,7 @@ int main(){
             // cout << recv_response << endl;
             int client_login = cc.login(client_sock_fd, tokens_vec.at(1), tokens_vec.at(2));
             if (client_login == -1){
-               cout << "[error] Could not connect client socket to server" << endl;
+               cout << "[Error] Could not connect client socket to server" << endl;
             } 
 
             char response_buff[MAX_LINE];
@@ -86,7 +86,14 @@ int main(){
             } else if (client_newuser == -3) {
                cout << "[ERROR] Invalid Password Length - should be between 4-8 characters\n";
             } else {
-               cout << "> New user " << tokens_vec.at(1) << " created - Please login.\n";
+               char response_buff[MAX_LINE];
+               int recieve_response = recv(client_sock_fd, response_buff, sizeof(response_buff), 0);
+               if (recieve_response == -1){
+                  cout << "Failed to Recieve Response from Server" << endl;
+               } else {
+               // cout << "> New user " << tokens_vec.at(1) << " created - Please login.\n";
+                  cout << response_buff;  
+               }
             }
             // else send command message to server
 
@@ -122,7 +129,6 @@ int main(){
             // int client_logout = cc.logout(client_sock_fd);
             char temp_buffer[MAX_LINE];
             strcpy(temp_buffer, tokens_vec.at(0).c_str());
-            cout << "Logout temp_buffer = " << temp_buffer << endl;
             if (send(client_sock_fd, temp_buffer, sizeof(temp_buffer), 0) < 0) {
                cout << "An error occured trying to logout." << endl;
                return -1;

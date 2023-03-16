@@ -95,21 +95,22 @@ int main(){
 /* while 2*/      
       while(1){
          ssize_t recieved = recv(client_sock_fd, buffer, sizeof(buffer), 0);
-         //= recv(client_sock_fd, buffer, sizeof(buffer), 0); 
          if ((recieved ) == 0){
             cout << "[Error] Connection with client lost" << endl;
             // close(client_sock_fd);
-            // break;
-            return -1;
+            break;
+            // return -1;
             // continue;
          } else if (recieved == -1) {
-            cout << "[Error] Failed to retrieve client message from socket - closing socket...";
-            return -1;
+            cout << "[Error] Failed to retrieve initial client message from socket - closing socket...";
+            // return -1;
+            break;
          }
 
          /* 
             Copying message from client into a string obj
          */
+         // cout << "INITIAL BUFFER: " << buffer << endl;
          stringstream copy_ss; 
          string message_str;
          copy_ss << buffer;
@@ -127,9 +128,8 @@ int main(){
 
          
          try {
-            
    /************************************ 
-            COMMAND: send
+            COMMAND: login
    ************************************/
             // cout << "--------" << tokens_vec.at(0) << endl;
             if (tokens_vec.at(0) == "login") {
@@ -170,7 +170,6 @@ int main(){
                      cout << login_success << endl;
                      strcpy(buffer, login_success.c_str());
                      send(client_sock_fd, buffer, sizeof(buffer), 0);
-
                   }
                   // cout << "Login Success! User " << tokens_vec.at(1) << " signed in" << endl;
                } else { // 
@@ -219,12 +218,13 @@ int main(){
                   send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
                   cout << newuser_fail_msg;
 
-                  // throw CustomException(error_msg1.c_str());
-               } 
-               char temp_buff[MAX_LINE];
-               string newuser_message = "[server] > successfully created new user (" + curr_user.get_uid() + ") - Please Login\n";
-               strcpy(temp_buff, newuser_message.c_str());
-               send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
+               } else if (server_newuser == 0) {
+                  char temp_buff[MAX_LINE];
+                  string newuser_message = "[server] > successfully created new user (" + tokens_vec.at(1) + ") - Please Login\n";
+                  strcpy(temp_buff, newuser_message.c_str());
+                  send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
+               }
+               
                
    /************************************ 
             COMMAND: send
@@ -289,7 +289,7 @@ int main(){
             } else {
                const char*invalid_input = "[Error]: Invalid command useage -> try again\n";
                send(client_sock_fd, invalid_input, MAX_LINE, 0);
-               return -1;
+               // return -1;
             }
             
          } catch (CustomException &e){ // handle thrown exceptions for custom errors
@@ -307,6 +307,7 @@ int main(){
       }
       // return 0;
    }
+   cout << "RETURN 0\n";
    return 0; 
 }
 

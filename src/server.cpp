@@ -78,14 +78,15 @@ int main(){
 /***** while 1 *****/
    while(1){
       cout << "[Server] > Server-Client Connection Successfully Established!\n"
-            << "     [Server Connected on Port #" << SERVER_PORT << "]"
-            << "\n------------------------------------------------------------" << endl;
+      << "     [Server Connected on Port #" << SERVER_PORT << "]"
+      << "\n------------------------------------------------------------" << endl;
       int client_sock_fd;
-      if ((client_sock_fd = accept(server_sock_fd, NULL, NULL)) < 0) {
+      if ((client_sock_fd = accept(server_sock_fd, NULL, NULL)) == -1) {
          cout << "[ERROR] Failed to accept client connection" << endl;
-         return -1; 
-      }
+         continue;
+      } 
       cout << "Successfully Connected to Client" << endl; 
+      
       
       // Users*curr_user = nullptr;
       // curr_user = new Users();
@@ -106,13 +107,12 @@ int main(){
 /* while 2*/      
       while(1){
          ssize_t recieved = recv(client_sock_fd, buffer, sizeof(buffer), 0); 
-         if (recieved <= 0){
+         if (recieved < 0){
             cout << "[ERROR] Connection with client lost\n> Closing socket...." << endl;
             close(client_sock_fd);
             break;
+            // continue;
          }
-         // cout << "[from: " << curr_user->get_uid() << "]: " << buffer << endl;
-         cout << "[From Client]: " << buffer << endl;
 
          /* 
             Copying message from client into a string obj
@@ -128,23 +128,19 @@ int main(){
          tokens_vec = sc.tokenize(message_str, ' '); 
 
          
-         for (vector<string>::size_type i = 0; i < tokens_vec.size(); i++){
-            cout << "at " << i << " " << tokens_vec.at(i) << "\n";
-         }
+         // for (vector<string>::size_type i = 0; i < tokens_vec.size(); i++){
+         //    cout << "at " << i << " " << tokens_vec.at(i) << "\n";
+         // }
 
-         /* ************
-          *
-          *  Commands
-          * 
-          ************ */   
+
          try {
-            // cout << "BEFORE COMMANDS CHECKS (" << tokens_vec.at(0) << ")" << endl;
-            // cout << buffer << endl;
-
-            /****************** 
-               COMMAND: login
-            ******************/
+   /************************************ 
+            COMMAND: send
+   ************************************/
             if (tokens_vec.at(0) == "login") {
+               // string user_id = curr_user.get_uid();
+               string user_id = tokens_vec.at(1);
+               cout << user_id << endl;
                string login_fail_msg;
                int server_login = sc.recieve_login(client_sock_fd, tokens_vec.at(1), tokens_vec.at(2), curr_user);
                // cout << "--- IN SERVER MAIN: user status = " << curr_user.get_login_status() << endl;
@@ -170,29 +166,30 @@ int main(){
                      send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
                      cout << login_fail_msg << endl;
                      // throw CustomException(login_fail_msg.c_str());
-                  } else {
+                  } 
+                  else {
                      // cout << "STATUS 2 BEFORE: " << curr_user.get_login_status() << endl;
                      curr_user.set_login_status(true);
                      // cout << "STATUS 2 AFTER: " << curr_user.get_login_status() << endl;
                      string login_success = "[server]: Successfully logged-in " + tokens_vec.at(1) + "!";
-                     cout << "[server] " << login_success << endl;
+                     cout << login_success << endl;
                      strcpy(buffer, login_success.c_str());
                      send(client_sock_fd, buffer, sizeof(buffer), 0);
+
                   }
-                  cout << "Login Success! User " << tokens_vec.at(1) << " signed in" << endl;
+                  // cout << "Login Success! User " << tokens_vec.at(1) << " signed in" << endl;
                } else { // 
                   // cout << "STATUS 3 STATUS = TRUE : " << curr_user.get_login_status() << endl;
                   string success_msg_tst = "User already logged in\n";
                   char temp_buff[MAX_LINE];
                   strcpy(temp_buff, success_msg_tst.c_str());
                   send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
-
                }
 
 
-            /****************** 
-               COMMAND: newuser
-            ******************/
+   /************************************ 
+            COMMAND: newuser
+   ************************************/
             } else if (tokens_vec.at(0) == "newuser") {
                string newuser_fail_msg;
                int server_newuser = sc.recieve_newuser(client_sock_fd, tokens_vec.at(1), tokens_vec.at(2));
@@ -225,7 +222,7 @@ int main(){
                   char temp_buff[MAX_LINE];
                   strcpy(temp_buff, newuser_fail_msg.c_str());
                   send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
-                  cout << newuser_fail_msg << endl;
+                  cout << newuser_fail_msg;
 
                   // throw CustomException(error_msg1.c_str());
                } 
@@ -234,15 +231,39 @@ int main(){
                strcpy(temp_buff, newuser_message.c_str());
                send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
                
-            /****************** 
-               COMMAND: message
-            ******************/
-            } else if (tokens_vec.at(0) == "message") {
+   /************************************ 
+            COMMAND: send
+   ************************************/
+            } else if (tokens_vec.at(0) == "send") {
+               string send_fail_msg;
+               
+               if (tokens_vec.size() <= 1){
+                  send_fail_msg = "[server] > [Error]: Invalid command usage\n";
+                  char temp_buff[MAX_LINE];
+                  strcpy(temp_buff, send_fail_msg.c_str());
+                  send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
+                  cout << send_fail_msg; 
+               }
+
                // MUST BE LOGGED IN TO SEND A MESSAGE
-               if (curr_user.get_login_status() == true) { 
+               if (curr_user.get_login_status() == true) {  /* IF THE USER IS LOGGED IN */
+                  int server_send = sc.recieve_message(client_sock_fd, tokens_vec, curr_user);
+                  if (server_send == 0){
+                     cout << "> Successfully returned message to client" << endl;
+                     continue; 
+                  } else if (server_send == -1) {
+                     send_fail_msg = "[error]: Invalid socket - could not send message\n";
+                     char temp_buff[MAX_LINE];
+                     strcpy(temp_buff, send_fail_msg.c_str());
+                     send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
 
-
-               } else { // IF NOT LOGGED IN
+                  } else if (server_send == -2) {
+                     send_fail_msg = "[error]: failed to send return message to client\n";
+                     char temp_buff[MAX_LINE];
+                     strcpy(temp_buff, send_fail_msg.c_str());
+                     send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
+                  }
+               } else { /* ELSE IF THE USER ISN'T LOGGED IN */
                   string failed_send = "[ERROR] Must be logged in to send a message!";
                   strcpy(buffer, failed_send.c_str());
                   send(client_sock_fd, buffer, sizeof(buffer), 0);
@@ -251,47 +272,38 @@ int main(){
             /****************** 
                COMMAND: logout
             ******************/
-            } else if (tokens_vec.at(0).compare("logout") == 0) {
-               // MUST BE LOGGED IN TO LOG OUT 
-               if (curr_user.get_login_status() == false){
-                  string failed_logout = "[ERROR] No User to Logout!";
-                  char logout_buff[MAX_LINE];
-                  strcpy(logout_buff, failed_logout.c_str());
-                  send(client_sock_fd, logout_buff, sizeof(logout_buff), 0);
-                  throw CustomException(failed_logout.c_str());
-               } else { // if there is someone logged in
-                  curr_user.set_login_status(false);
-                  int rt_logout = sc.recieve_logout(client_sock_fd);
-                  if (rt_logout != 0){
-                     throw CustomException("Logout failed\n");
-                  }
-                  string logout_success = "> " + curr_user.get_uid() + " logging out...\n";
-                  cout << "User: " << curr_user.get_uid() << " logged out" << endl;
-                  char logout_buff[MAX_LINE];
-                  strcpy(logout_buff, logout_success.c_str());
-                  send(client_sock_fd, logout_buff, sizeof(logout_buff), 0);
-                  tokens_vec.at(1).clear();
-                  
+            } else if (tokens_vec.at(0).compare("logout")) {
+               int server_logout = sc.recieve_logout(client_sock_fd, curr_user);
+               if (server_logout == -1) {
+                  return server_logout;
+               } else if (server_logout == -2) {
+                  cout << "> No users logged in - nothing to log out";
+                  return -1;
+               } else if (server_logout == 1) {
+                  cout << "> [server]: Failed to send return message to server: " << curr_user.get_uid() << endl;
+                  return 1;
+               } else if (server_logout == 0) {
+                  cout << "> Logging (user: " << curr_user.get_uid() << ") out" << endl;
+                  return 0;
                }
-
             }
             
          } catch (CustomException &e){ // handle thrown exceptions for custom errors
             cout << e.what() << endl;
          } catch (invalid_argument& e) { // handle invalid argument exceptions for invalid commands / usage 
             cout << e.what() << endl;
-         } catch (exception& e) {  // handle other possible excpetions that may have been missed such as vector errors
+         } catch (exception& e) {  // handle 'out_of_range' vector exception
             /*
-               This catch is printing 'vector' for some reason
+               This catch is printing 'vector' 
+               -> don't print out-of-range exceptions
             */
-            cout << e.what() << endl;
+            // cout << e.what() << endl;
          }
-
+         // return 0;
       }
 
    }
-
-   return EXIT_SUCCESS; 
+   return 0; 
 }
 
 

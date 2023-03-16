@@ -20,7 +20,7 @@ class ClientCommands {
    public: 
       int login(int socket, string& user_id, string& password);
       int create_newuser(int socket, string& username, string& password);
-      int send_message(int socket, char*message);
+      int send_message(int socket, string& message);
       int logout(int socket);
 
       /* 

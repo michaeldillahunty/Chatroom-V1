@@ -32,8 +32,11 @@ class ServerCommands {
       // int recieve_login(int socket, string user_id, string password);
       int recieve_login(int socket, string user_id, string password, Users&user_obj);
       int recieve_newuser(int socket, string& newuser_id, string& new_passwd);
-      int recieve_message(int socket, string& message);
-      int recieve_logout(int socket);
+      // int recieve_message(int socket, string& message);
+      // int recieve_message(int socket, string& message, Users*user);
+      int recieve_message(int socket, vector<string>message_vec, Users&user);
+      // int recieve_logout(int socket);
+      int recieve_logout(int socket, Users& user);
 
       /* 
          HELPER FUNCTIONS

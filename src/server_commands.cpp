@@ -72,7 +72,7 @@ int ServerCommands::recieve_login(int socket, string user_id, string password, U
    }
    return -2; // User not found
 */
-   if (socket <= 0) {
+if (socket <= 0) {
       return -1;
    }
 
@@ -93,9 +93,6 @@ int ServerCommands::recieve_login(int socket, string user_id, string password, U
    for (auto user : user_vec) {
       if (user.get_uid().compare(obj_uid) == 0 && user_obj.get_login_status() == false) {
          if (user.get_password().compare(obj_pass) == 0) {
-               // cout << "Updated Login Status: \n Before: " << user_obj.get_login_status();
-               // user_obj.set_login_status(true); // update user login status
-               // cout << "\n After: " << user_obj.get_login_status() << endl;
                return 1; // success 
          }
          else {    // else if existing password != given password
@@ -216,20 +213,92 @@ vector<Users> ServerCommands::search_file(const string& filename){
    return error_vec;
 }
 
-int ServerCommands::recieve_message(int socket, string& message){
-   UNUSED(socket);
-   UNUSED(message);
-   return 0;
-}
-
-int ServerCommands::recieve_logout(int socket){
+int ServerCommands::recieve_message(int socket, vector<string>message_vec, Users&user){
    // UNUSED(socket);
-   if (socket <= 0){
+   // UNUSED(message);
+   // return 0;
+   if (socket <= 0 || message_vec.size() < 1){
       return -1; 
    }
-   cout << "Logging out..." << endl;
+   // cout << "(in server handler)---------USER: " << user.get_uid() << endl;
+   // for (auto i = message_vec.begin() + 1; i != message_vec.end(); ++i){
+   //    cout << "  OUTPUT: " << *i << endl;
+   // }
+
+   string return_msg = "> [from: " + user.get_uid() + "]: "; 
+   for (auto word = message_vec.begin() + 1; word != message_vec.end(); ++word){
+      return_msg = return_msg + *word + ' ';
+   }
+   cout << return_msg << endl;
+   char ret_buff[MAX_LINE];
+   strcpy(ret_buff, return_msg.c_str());
+   if (send(socket, ret_buff, sizeof(ret_buff), 0) == -1){
+      return -2;
+   }
+
+   // cout << "RETURN MESSAGE: " << return_msg << endl;
    return 0;
+
+
 }
+
+// int ServerCommands::recieve_message(int socket, string& message, Users*user){
+//    // UNUSED(socket);
+//    // UNUSED(message);
+//    // return 0;
+//    if (socket <= 0 || message.length() == 0){
+//       return -1; 
+//    }
+
+//    char buff[MAX_LINE];
+//    strcpy(buff, message.c_str());
+//    if ((send(socket, buff, sizeof(buff), 0)) == -1) {
+//       return -2; 
+//    }
+//    return 0;
+
+
+// }
+
+int ServerCommands::recieve_logout(int socket, Users& user){
+   cout << "---- TEST 1" << endl;
+   string fail_logout;
+   if (socket <= 0){
+      fail_logout = "[error]: Invalid socket\n";
+      return -1; 
+   }
+   
+   if (user.get_login_status() == false){ // if the user is not logged in 
+      char buff[MAX_LINE];
+      fail_logout = "[error]: No user is logged in\n";
+      strcpy(buff, fail_logout.c_str());
+      cout << "In Recieve Logout : " << buff << endl;
+      return -2; 
+   } else {
+      user.set_login_status(false);
+      string return_msg;
+      char buff[MAX_LINE];
+      strcpy(buff, return_msg.c_str());
+      cout << "In Recieve Logout : " << buff << endl;
+      if (send(socket, buff, sizeof(buff), 0) == -1){
+         return 1; 
+      } else {
+         return_msg = "> [server] Successfully logged out User: " + user.get_uid();
+         cout << "> [server] Successfully logged out User: " << user.get_uid() << endl;
+      }
+   }
+   return 0; 
+}
+
+
+// int ServerCommands::recieve_logout(int socket){
+//    // UNUSED(socket);
+//    if (socket <= 0){
+//       return -1; 
+//    }
+//    // cout << "Logging out..." << endl;
+//    return 0;
+// }
 
 vector<string>ServerCommands::tokenize(const string& s, char delimiter){
    vector<string>result;

@@ -319,11 +319,6 @@ bool ServerCommands::write_user_to_file(const string& filename, Users new_user_o
    ofs.close();
    cout << "Successfully Added User: " << new_user_obj.get_uid() << endl;
    return true;
-   // string user_data;
-   // user_data = "(" + new_user_obj.get_uid() + ", " + new_user_obj.get_password() + ")";
-   // ofstream ofs(filename);
-   // ofs.open(filename, ios_base::app);
-   // ofs << endl << user_data;
 }
 
    

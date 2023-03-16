@@ -133,6 +133,7 @@ int main(){
                cout << "An error occured trying to logout." << endl;
                return -1;
             }
+            // send(client_sock_fd, temp_buffer, sizeof(temp_buffer), 0);
             return 0;      
 
          } else {

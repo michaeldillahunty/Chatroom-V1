@@ -110,9 +110,9 @@ int main(){
          if (recieved < 0){
             cout << "[ERROR] Connection with client lost\n> Closing socket...." << endl;
             close(client_sock_fd);
-            break;
-            // continue;
-         }
+            // break;
+            continue;
+         } 
 
          /* 
             Copying message from client into a string obj
@@ -128,15 +128,17 @@ int main(){
          tokens_vec = sc.tokenize(message_str, ' '); 
 
          
-         // for (vector<string>::size_type i = 0; i < tokens_vec.size(); i++){
-         //    cout << "at " << i << " " << tokens_vec.at(i) << "\n";
-         // }
+         for (vector<string>::size_type i = 0; i < tokens_vec.size(); i++){
+            cout << "at " << i << " " << tokens_vec.at(i) << "\n";
+         }
 
-
+         
          try {
+            
    /************************************ 
             COMMAND: send
    ************************************/
+            // cout << "--------" << tokens_vec.at(0) << endl;
             if (tokens_vec.at(0) == "login") {
                // string user_id = curr_user.get_uid();
                string user_id = tokens_vec.at(1);
@@ -243,6 +245,7 @@ int main(){
                   strcpy(temp_buff, send_fail_msg.c_str());
                   send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
                   cout << send_fail_msg; 
+                  return -1; 
                }
 
                // MUST BE LOGGED IN TO SEND A MESSAGE
@@ -250,42 +253,56 @@ int main(){
                   int server_send = sc.recieve_message(client_sock_fd, tokens_vec, curr_user);
                   if (server_send == 0){
                      cout << "> Successfully returned message to client" << endl;
-                     continue; 
                   } else if (server_send == -1) {
                      send_fail_msg = "[error]: Invalid socket - could not send message\n";
                      char temp_buff[MAX_LINE];
                      strcpy(temp_buff, send_fail_msg.c_str());
                      send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
-
+                     return -1; 
                   } else if (server_send == -2) {
                      send_fail_msg = "[error]: failed to send return message to client\n";
                      char temp_buff[MAX_LINE];
                      strcpy(temp_buff, send_fail_msg.c_str());
                      send(client_sock_fd, temp_buff, sizeof(temp_buff), 0);
+                     return -1;
                   }
                } else { /* ELSE IF THE USER ISN'T LOGGED IN */
                   string failed_send = "[ERROR] Must be logged in to send a message!";
                   strcpy(buffer, failed_send.c_str());
                   send(client_sock_fd, buffer, sizeof(buffer), 0);
+                  return -1;
                }
 
             /****************** 
                COMMAND: logout
             ******************/
-            } else if (tokens_vec.at(0).compare("logout")) {
+            cout << "LOGOUT 1" << endl;
+            } else if (tokens_vec.at(0) == "logout") {
+               cout << "LOGOUT 2" << endl;
+               cout << curr_user.get_login_status() << endl;
                int server_logout = sc.recieve_logout(client_sock_fd, curr_user);
                if (server_logout == -1) {
+                  cout << "LOGOUT 3" << endl;
                   return server_logout;
                } else if (server_logout == -2) {
+                  cout << "LOGOUT 4" << endl;
                   cout << "> No users logged in - nothing to log out";
                   return -1;
                } else if (server_logout == 1) {
+                  cout << "LOGOUT 5" << endl;
                   cout << "> [server]: Failed to send return message to server: " << curr_user.get_uid() << endl;
-                  return 1;
+                  return -1;
                } else if (server_logout == 0) {
+                  cout << "LOGOUT 5" << endl;
                   cout << "> Logging (user: " << curr_user.get_uid() << ") out" << endl;
-                  return 0;
+
+                  break;
                }
+               cout << "LOGOUT 6" << endl;
+            } else {
+               const char*invalid_input = "[Error]: Invalid command useage -> try again\n";
+               send(client_sock_fd, invalid_input, MAX_LINE, 0);
+               return -1;
             }
             
          } catch (CustomException &e){ // handle thrown exceptions for custom errors

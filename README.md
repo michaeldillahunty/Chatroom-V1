@@ -9,10 +9,12 @@
    * CMakeList version 3.8 or higher
 
 1) Clone or download this repository to your local disk
-2) `cd` into the project (i.e. `cd Chatroom-V1`) then to the `build` directory 
-3) Once in the build directory: run `cmake ..` 
-4) Execute `./server` first to run the server
-5) With the server still running, in another terimal: run `./client`
-6) In the running `client` instance you can use the chatroom commands:
-                   {`login`, `newuser`, `send`, `logout`}
+2) `cd` into the project (i.e. `cd Chatroom-V1`) 
+3) run `mkdir build` then `cd build` 
+4) Once in the build directory: run `cmake ..` to link all libraries needed
+5) Run `make` which will compile everything into 2 executables : (1) server (2) client
+7) Execute `./server` first to open a socket
+8) With the server still running, in another terimal instance: run `./client`
+9) In the running `client` instance you can then start using the chatroom and it's commands:
+                   Commands: {`login`, `newuser`, `send`, `logout`}
 

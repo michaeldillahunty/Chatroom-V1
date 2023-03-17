@@ -16,5 +16,6 @@
 7) Execute `./server` first to open a socket
 8) With the server still running, in another terimal instance: run `./client`
 9) In the running `client` instance you can then start using the chatroom and it's commands:
-                   Commands: {`login`, `newuser`, `send`, `logout`}
+                   
+                   Available Commands: {`login`, `newuser`, `send`, `logout`}
 

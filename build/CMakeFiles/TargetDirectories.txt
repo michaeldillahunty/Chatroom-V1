@@ -1,6 +1,0 @@
-/Users/dillahuntym/Documents/Spring_2023/CS4850-Networks/Chatroom-V1/build/CMakeFiles/server_lib.dir
-/Users/dillahuntym/Documents/Spring_2023/CS4850-Networks/Chatroom-V1/build/CMakeFiles/client_lib.dir
-/Users/dillahuntym/Documents/Spring_2023/CS4850-Networks/Chatroom-V1/build/CMakeFiles/server.dir
-/Users/dillahuntym/Documents/Spring_2023/CS4850-Networks/Chatroom-V1/build/CMakeFiles/client.dir
-/Users/dillahuntym/Documents/Spring_2023/CS4850-Networks/Chatroom-V1/build/CMakeFiles/edit_cache.dir
-/Users/dillahuntym/Documents/Spring_2023/CS4850-Networks/Chatroom-V1/build/CMakeFiles/rebuild_cache.dir

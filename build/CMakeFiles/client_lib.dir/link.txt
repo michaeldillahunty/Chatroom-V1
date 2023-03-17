@@ -1,1 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/c++ -std=c++11 -Wall -Wextra -Wshadow -Werror -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk -dynamiclib -Wl,-headerpad_max_install_names -o libclient_lib.dylib -install_name @rpath/libclient_lib.dylib CMakeFiles/client_lib.dir/src/client_commands.cpp.o 

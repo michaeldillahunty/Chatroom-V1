@@ -1,5 +1,4 @@
-# Chatroom V1 for CS4850 - Networks @ Mizzou
-
+# Chatroom V1 - Single Client-Server Connection
 ## Compilation Instructions:
 
    ### Requirements:
